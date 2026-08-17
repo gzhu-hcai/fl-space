@@ -37,7 +37,7 @@ config -> environment + orbit -> simulator -> FL core -> experiments/results
 | Package and basic algorithms | `tests/test_fl_algorithms.py`, `tests/test_quick.py` | Algorithm and smoke-test coverage |
 | Orbit/time behavior | `tests/test_time_model.py`, `tests/test_satellite_data_profiles.py` | Timing and satellite data behavior |
 | FedLEO fidelity boundary | `fl_space/fedleo/conformance.py` | Explicit implemented, approximated, and missing behavior |
-| FedLEO offloading validation | `scripts/validate_fedleo_offloading.py` | On/off results in `fedleo_web_validation_*/` |
+| FedLEO offloading validation | `scripts/validate_fedleo_offloading.py`, `scripts/validate_fedleo_triggered_offloading.py` | Standard and forced-trigger on/off results in `experiments/validation_results/` |
 | FedLEO tests | `tests/test_fedleo_offloading.py`, `tests/test_fedleo_conformance.py` | Planner and boundary metadata coverage |
 | CLI and web workflows | `tests/test_cli_params.py`, `tests/test_web_*.py` | Parameter and session/orbit flow coverage |
 | Coding standards | `CODING_STANDARDS.md`, `pyproject.toml` | Ruff is the only formatter/linter |
@@ -55,6 +55,8 @@ Local literature and analysis live in `文献/`. Primary current anchors include
 ## FedLEO Boundary
 
 `fl_space/fedleo/conformance.py` is authoritative for the FedLEO implementation claim. At this map revision, the repository provides a lightweight discrete simulation with non-IID satellite datasets, ISL-neighbor offloading, greedy iterative offloading, weighted intra/inter-plane aggregation, and metrics.
+
+The standard 20260812 validation did execute four offload actions in round 2 (262 samples total), then stopped after the distribution became balanced. The controlled trigger script uses severe sample imbalance, one-round scheduling, low communication penalty, and repeated-action gates to distinguish a one-time action from sustained planner activation.
 
 It deliberately approximates discrete ratio search, divergence, ring aggregation, delay, and topology. It does not implement the paper's KKT communication-power optimization, multi-hop streaming contention/channel gain, dynamic cross-seam contact constraints, or full continuous P1-P4 optimization. Do not state otherwise without changing that metadata and adding validation.
 

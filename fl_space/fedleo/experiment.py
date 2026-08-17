@@ -19,6 +19,8 @@ FedLEO 实验运行器 — FedLEO vs 基线 对比实验
     )
 """
 
+from __future__ import annotations
+
 import csv
 from dataclasses import dataclass, field
 import json

@@ -367,6 +367,18 @@ def _read_cc_switch_provider() -> dict[str, str]:
     }
 
 
+def _read_deepseek_config() -> dict[str, str]:
+    config = _read_json(AI_CONFIG_FILE, {})
+    if not isinstance(config, dict) or config.get("source") != "deepseek":
+        raise RuntimeError("DeepSeek 本地配置未启用")
+    api_key = str(config.get("api_key") or "").strip()
+    if not api_key:
+        raise RuntimeError("DeepSeek API Key 未配置")
+    base_url = str(config.get("base_url") or "https://api.deepseek.com").strip().rstrip("/")
+    model = str(config.get("model") or "deepseek-chat").strip()
+    return {"api_key": api_key, "base_url": base_url, "model": model}
+
+
 def _ai_settings() -> dict[str, Any]:
     config = _read_json(AI_CONFIG_FILE, {})
     if isinstance(config, dict) and config.get("source") == "cc_switch":
@@ -384,6 +396,23 @@ def _ai_settings() -> dict[str, Any]:
                 "ai_model": "--",
                 "ai_configured": False,
                 "ai_source": "cc_switch",
+                "ai_error": str(exc),
+            }
+    if isinstance(config, dict) and config.get("source") == "deepseek":
+        try:
+            provider = _read_deepseek_config()
+            return {
+                "ai_provider": "DeepSeek",
+                "ai_model": provider["model"],
+                "ai_configured": True,
+                "ai_source": "manual",
+            }
+        except RuntimeError as exc:
+            return {
+                "ai_provider": "DeepSeek",
+                "ai_model": "--",
+                "ai_configured": False,
+                "ai_source": "manual",
                 "ai_error": str(exc),
             }
     return {
@@ -434,14 +463,23 @@ def _deepseek_analysis(
     question: str,
     experiment: dict[str, Any] | None,
 ) -> str:
-    api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("DeepSeek API 尚未配置")
+    config = _read_json(AI_CONFIG_FILE, {})
+    if isinstance(config, dict) and config.get("source") == "deepseek":
+        provider = _read_deepseek_config()
+    else:
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+        if not api_key:
+            raise RuntimeError("DeepSeek API 尚未配置")
+        provider = {
+            "api_key": api_key,
+            "base_url": "https://api.deepseek.com",
+            "model": "deepseek-chat",
+        }
 
     context = _analysis_context(experiment)
 
     payload = {
-        "model": "deepseek-chat",
+        "model": provider["model"],
         "temperature": 0.2,
         "max_tokens": 1200,
         "messages": [
@@ -459,10 +497,10 @@ def _deepseek_analysis(
         ],
     }
     request = Request(
-        "https://api.deepseek.com/chat/completions",
+        f"{provider['base_url']}/chat/completions",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {provider['api_key']}",
             "Content-Type": "application/json",
         },
         method="POST",

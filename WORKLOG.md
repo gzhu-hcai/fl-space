@@ -786,3 +786,10 @@ web: `server.py`
 ---
 
 <!-- 新增改动请在此行下方、按日期倒序追加 -->
+## 2026-08-16 - FedLEO offloading trigger validation
+
+- Audited `FedLEOScheduler`, `FedLEOPlanner`, and `FedLEOAggregator` against the existing 20260812 archive.
+- Corrected the interpretation: the archive executed 4 actions in round 2 and moved 262 samples; rounds 6-10 were inactive because the distribution was already balanced.
+- Added `scripts/validate_fedleo_triggered_offloading.py` with a fixed-seed on/off control, severe sample imbalance, low communication penalty, and gates requiring multiple action rounds, payloads, delay accounting, and sample conservation.
+- The implementation remains a lightweight simulation: planner and aggregation run in one process with full-state visibility; Ring-Allreduce is represented by an equivalent weighted average, not peer-to-peer message passing.
+- Full Torch experiment execution is pending in the current environment because the active Python environment does not provide PyTorch.

@@ -1,0 +1,1236 @@
+FL training (e.g., ocean or wilderness monitoring stations)
+ unstable terrestrial connections with central servers,
+satellite connectivity enables them to quickly acquire knowledge
+from multiple peers, improving their local training.
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+However, despite its promise, FL within satellite-assisted ter-
+ networks remains largely unexplored. This is a
+
+ that requires the meticulous design of transmission
+tailoredtotheintrinsiccharacteristicsofsatellitenetworks,
+ well as the effective utilization of satellite transmissions to
+ the various performance challenges posed by system
+heterogeneity. Firstly, the limited contact time and bandwidth of
+satellite networks?particularly in the uplink?signicantly con-
+strain the delivery of parameters. Secondly, ground devices typi-
+cally operate in highly diverse environments, characterized by
+data heterogeneity, varying terrestrial network conditions, and dif-
+fering local computing power. These system heterogeneities nota-
+bly degrade model performance and present a primary challenge
+that satellite assistance must effectively address.
+1
+satellite-assisted FL paradigm and its main challenges, which
+will explore in greater detail in the next section.
+addressthesechallenges,weproposeasatellite-assistedFL
+ for resource-constrained and heterogeneous environ-
+namedSatFed.InSatFed,eachedgedevicetrainsaperson-
+ model for local inference while also contributing to global
+ training. Global model updates occur asynchronously
+ devices and the server via terrestrial networks, whileexchangepersonalizedmodelspeer-to-peerthroughsatel-
+ networks for mutual guidance. SatFed utilizes freshness-
+ queues for parameter transmission over bandwidth-
+ satellite networks, ensuring that devices receive the
+ up-to-date peer models. Additionally, a multigraph with
+three edge types is employed to dynamically capture diverse
+heterogeneities between devices, optimizing the local utilization
+of peer models received from satellite networks. The three edge
+types are  similarity edges, which help devices learn from peers
+with similar data distributions;  connection edges, which enable
+devices to benet from peers with superior terrestrial bandwidth;
+  computation edges, which monitor differences in device
+updatespeedsandadjustthelocallearningrateaccordingly.
+key contributions can be summarized as follows:
+1. WhilesatellitenetworksofferapotentialsolutiontothecongestionandcoveragelimitationsoftraditionalterrestrialFL,their efciency presents major challenges
+from inherent satellite network constraints and FL system heterogeneity. w/: with.
+ourknowledge,SatFedisapioneeringefforttoharnessLEO
+networksfor
+FLwithintraditionalterrestrial
+networks.Ittacklesthedistinctivetransmissioncharacteristics
+of satellite networks by implementing model freshness queues,
+effectively mitigating the challenges posed by constrained
+bandwidth on satellite-assisted performance.
+investigate innovative solutions for addressing system
+heterogeneity in satellite-assisted terrestrial communication
+frameworks, employing a multigraph to monitor real-time
+model transmissions within satellite networks and capture intri-
+systemheterogeneities. Through meticulous design of local
+updates, the multigraph-guided integration of satellite-
+transmitted models markedly improves training performance.
+implementtheSatFedprototypeusingactualLEOsatellite and datasets. Comprehensive experiments demon-
+itscapacity to achieve efcient and robust FL with satel-
+lite assistance across various heterogeneous conditions.
+Motivation
+thissection,wepresentempiricalmeasurementsthatunder-
+ the challenges inherent in satellite-assisted FL, thereby
+strengthening the motivation for the design of SatFed.
+C
+s
+network transmission
+satellites
+ periodically, engaging in bidirectionaldata
+transmission when within range of ground devices, and are pri-
+constrainedbytheirbriefcontacttimesandlimiteduplink
+bandwidth.Forinstance,satellites orbiting at an altitude of 700 km
+complete one orbit approximately every 100 min, with contact
+windows to ground devices lasting only about 10 min [
+Asillus-
+trated in
+2
+we assess parameter-transmission efciency
+theseeetingcontactperiodsusing the Starlink LEO satel-
+lite communication system.
+presentsthecumulativedis-
+ function (CDF) derived from Iperf [
+a widely used
+measurementtool,revealinganaveragedownlinkrateof
+approximately100megabitspersecond(Mbps)andanuplink rate
+of around 12 Mbps. For example, downloading a 98 Mb ResNet-50
+model [
+from the satellite to each device takes about 8 s,
+ uploading the model back to the satellite requires more
+than a minute. Thus, the principal bottleneck in satellite network
+transmission lies in the uplink direction.
+Y. Zhang, Z. Lin, Z. Chen et al.
+Engineering 54 (2025) 115?126
+2. TheuplinkintheLEOsatellitenetworkrepresentsasignicanttransmissionbottleneck.(a)Ourexperimentalsetup;(b) the resulting cumulative distribution function
+(CDF) showing the satellite network speed. Mbps: megabits per second.
+an ideal scenario, each connection between a device and a
+satellite involves extensive model exchanges
+(as detailed further
+3.2
+However,duetolimitationsinuplinktransmission
+thesuccessfultransmissionofmodels(typicallyfewerthan
+inourResNet-50case)is signicantly constrained. Thus, prior-
+itizing critical models for satellite transmission is essential to opti-
+mize satellite-assisted performance.
+Dataheterogeneity
+performance of satellite-assisted FL is signicantly
+ by data heterogeneity, as devices distributed globallydatafromdiversecontexts.These devices exhibit non-
+independent and non-identically distributed (non-IID) data, result-
+ing in varied local optimization objectives [
+Consequently,
+updatesfromdifferentdevicesarebiasedtowardtheirlocal
+distributions.Directlyaveraging these updates?as is done in
+the widely used FL method FedAvg [
+leadstosuboptimal
+performance.Tobetterunderstandtheimpactofdata
+ on training, we conducted experiments with the ResNet-50
+model using FedAvg at varying levels of heterogeneity, as shown
+3
+[
+The results clearly indicate that performance
+signicantly as data heterogeneity increases.
+Moreover, relying solely on a single global model can lead to
+ challenges across devices. To investigate this issue, we
+evaluated each device?s local test accuracy under various heteroge-
+neous conditions, as shown in
+3
+[
+(wherethedashed
+represents the average). It is evident that, as heterogeneity
+theglobalmodelexhibitsgreaterperformancevariance
+devices,signicantlyreducingfairness.Althoughextensive
+research has been conducted on the impact of data heterogeneity
+on FL, most studies focus on PS communication frameworks [
+donotadapttoemerginghybrid satellite?terrestrial network
+architectures.
+3. Theimpactofdataheterogeneity.(a)Heterogeneity levels; (b) fairness. The CIFAR-100 dataset [
+isdistributedamongtenedgedevices,withlocallabelsfollowinga
+Dirichlet distribution; a smaller value of
+
+indicates greater heterogeneity [
+Theexperimentalparameters are consistent with
+4
+ID: identication;
+balancing
+Bandwidthheterogeneity
+networks
+ provide
+ bandwidth than
+ networks, but they are subject to variability and hetero- due to factors such as uctuating user volumes, routing
+conditions, and regional infrastructure disparities [
+Devices
+inremoteareasorcongestedenvironments(a.k.a.,strag-
+experience longerdelays in parameter transmission,which
+ turn slows down their local updates and ultimately hampers
+training performance. To better understand the impact of band-
+width heterogeneity on FL, we conducted experiments with vary-
+ing proportions of stragglers.
+4
+shows that, as the
+proportion of stragglers increases, FL experiences signicantly convergence and a marked deterioration in accuracy. As
+shown in
+4
+excludingoutdatedmodelupdatesfromaggre-
+ partially alleviates performance degradation but still falls
+ of the ideal. This comparison emphasizes that up-to-date
+models effectively extract local knowledge, while outdated models
+can negatively impact the system?s performance.
+t
+n
+satellitesandextensivecoveragein
+ constellations can enable edge devices to acquire timely
+knowledgefrommultiplepeersduringperiodsofgroundnetwork
+ or disconnection, thereby mitigating the issue of out-
+dated local updates. However, effective design to address the strag-
+gler problem in such a specialized and hybrid network architecture
+remains largely understudied.
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+4. Theimpactofbandwidthstragglers.(a)Stragglerratios;(b)damagefromstragglers.Localupdateswereasynchronouslyaggregatedtoformandevaluate the global
+model. Stragglers have a 90% chance of communication blockage or disconnection with the server, retrying every
+Computationheterogeneity
+challengeinsatellite-assistedFLfromthediffer-
+ence in computing capabilities among devices [
+Certain
+areundertrainedduetoinsufcientcomputationalpower
+ the same local update cycle. We conducted experiments
+to investigate how this uneven training in local updates across
+devices affects FL. As shown in
+5
+[
+thetestaccuracyof
+global modelsignicantlydecreases as thenumberof under-
+trained devices increases. It should be noted that, as illustrated
+5
+[
+theimbalanceinthemodelupdatesresultingfrom
+heterogeneitycanbemitigatedbyraisingthelearn- rate for undertrained devices. Increasing the learning rates
+for normal devices does not improve performance, emphasizing
+that the improvement in performance comes from balancing
+update scales.
+ndings show that the peer-to-peer communication
+ofsatellitenetworksisconducivetoedgedevicespromptly
+ the model update scales of their peers and adjusting
+ learning rates accordingly to ensure that all edge devices
+ with relatively consistent scales. However, in a hybrid
+satellite-assisted FL framework, strategies for the real-time and
+precise perception of peer update scales and the corresponding
+adjustment of local learning rates to achieve optimal performance
+require careful design.
+Frameworkdesign
+this section, we elaborate on the SatFed framework and its
+well-designed components.
+Theimpactofuneven(a)Undertrainedratios;(b) balance effect. The local update period is set to
+withnormaldevicesa compute power of
+operationspersecond(GFlops;performanceof a Raspberry Pi 4 Model B [
+whileundertraineddevices have only
+that.ThemodelisResNet-50
+with a batch size of
+balance(scaleanti-balance)increasesthelocallearning rates of undertrained (normal) devices by
+Preliminariesandoverview
+consider a typical scenario of a LEO-satellite-assisted FL.
+Each edge device
+itsown private dataset
+distribution
+theinput featuresand
+corresponding labels, and
+the number of devices. Devices
+share a model
+However,asoutlinedin
+2.2
+thismodel
+ effectively accommodate the diverse local data
+
+ofalldevices.Therefore,
+utilizepersonalizedmod-
+els for local inference on device. The optimization objective
+follows state-of-the-art FL methods using personalized models
+where all devices are trained
+ the FedAvg framework
+to update the global model
+using it to guide their own
+personalized model updates:
+1
+t
+
+min
+
+ 1
+the empirical loss
+to both models
+dataset
+theoutput of model
+input
+ahyperpa-
+rameter, and
+regulates
+ parameter distance between the personalized model and the
+model,achievingeffectivejointtraining. It is widely adopted
+in state-of-the-art personalized FL methods [
+27
+SatFed,localupdatesoftheglobalmodelareasynchronously
+ to the server for aggregation via the terrestrial net-
+work. Simultaneously, personalized models are transferred peer
+to peer through the satellite network in a decentralized manner.
+.
+y ,
+i m
+y D
+
+ f
+
+x y
+enotes t
+he expectation operator
+personalized model training is guided by both the global
+model and the peers? personalized models.
+Y. Zhang, Z. Lin, Z. Chen et al.
+Engineering 54 (2025) 115?126
+employsamodelfreshness-basedpriority-transmission
+ enabling edge devices to obtain more up-to-date models
+ peers in bandwidth-limited satellite networks. In addition,
+employsamultigraphthatcapturesmultipleheterogeneity
+relationshipsinrealtimeusingmodelstransmitted in the satellite
+network. This in turn aids in distilling knowledge from cached peer
+models to ensure the performance and robustness of local updates.
+A system overview of the SatFed framework is illustrated in
+6
+Satellitenetworktransmission
+thetransmissionofa satellite network with
+satellites,
+Kisthenumber of satellites), and device
+model caches
+respectively,forstoringperson-
+modelsfrom various devices. As depicted in
+6
+whena
+connectstoaLEOsatellite,ituploadsmodelsviatheuplink.
+satellitethentransmitscachedmodelstoedgedevicesthrough
+the downlink as it passes overhead. However, the intricate topol-
+ogy and stringent bandwidth constraints of satellite networks, as
+discussed in
+2.1
+present signican
+ challenges to naive
+ transmission?that is, to directly incorporating satellite
+communication into FL without any targeted design.
+Drawbacksofnaivetransmission
+satelliteorbitswithmultiplesatellitesoperatingon
+each, for each orbit
+L is the number of the satellite
+orbits), the set
+theedgedevicesitcovers.When
+two edge devices
+simultaneouslybyorbit?
+that is,
+term them??satellite-network
+direct,? which is denoted as
+thedenotation
+any device
+also be simultaneously
+bymultipleorbits, which is denoted as the orbit set
+can be inferred that
+the union
+considertwonaivetransmission modes: When device
+to satellite
+eitheruploadsonlyits personalized device
+ additionally uploads all cached peer models
+former method restricts satellite
+orbit
+only which limits device
+receiving models
+solely from devices in
+causing transmission bias.
+As shown in
+7
+evenwithanaverageLEOsatelliteorbitcov-
+upto ten devices and increasing the number of orbits to
+mayreceivefewerthanhalfofthepeermodels,resultingin
+ bias in collaborative knowledge distribution. The second
+eliminatesthisbiasbyallowingsatellitestoreceive
+
+fromotherorbits.However,itsignicantlyincreasesthetrans-
+loadontheuplinkofthesatellitenetwork and introduces
+a substantial number of redundant transmissions. When the same
+model is transmitted to another device through multiple orbits,
+redundant transmission occurs, consuming the highly limited
+bandwidth resources of the satellite network. As shown in
+7
+as the number of orbits and coverage increases, this
+redundancy becomes increasingly severe, wasting tens of times
+the bandwidth resources.
+6. SystemoverviewoftheSatFedframework.L
+
+localsupervisedlearning;L
+
+globalmodelguidancefrom the terrestrial network; L
+
+: peer model guidance
+from the satellite network.
+Modelfreshnessandpriority queues
+tackletransmissionbiasandredundancy,SatFedimplements
+model-priority queues to prioritize the transmission of critical
+ within the constrained bandwidth of satellite networks.
+we dene the freshness of each model circulating in the
+satellite network to indicate its level of obsolescence. Specically,
+each time a device
+thesatellite,ittimestampsthe
+model as
+upload initiation time. At
+any current time
+freshness of
+denoted as
+ that the closer the upload time
+of the model
+tothe current time
+higheritsfreshnessis,
+ahyperparametercontrollingthe outdated speed.
+on freshness, device
+upload and download
+model-priority queues,
+respectively,whenconnected
+to satellite
+the connection establishment time
+compares the freshness and of cached peer
+all
+different moments before
+If ,it
+upload queue
+it adds
+the
+m
+L,
+j
+j
+j m SatDir
+i j
+S
+S
+1 e
+ t t
+k
+k
+R
+k
+queue
+a cache
+amodel from device
+is treated as
+modelsinthequeuesarearranged
+ descending order according to the freshness difference
+Following the priority sequence in the
+queues, device
+subsequently uploads or downloads models,
+ the corresponding outdated models in the recipient
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+7. Simulationofproblemswithnaivesatellite network transmission. (a) Transmission bias (average
+differenttopology congurations, where
+transmissionredundancy when device
+the entire
+connectingtothesatellite.Redundancyindicatestheratioofredundanttransmissions to the total
+required transmissions of transmitted models to necessary ones.
+SatFed tackles bias and redundancy in satellite network
+transmission via priority queues.  If
+notexistintherecip-
+cacheor is extremely outdated, the sender positions
+the
+ of the queue for priority transmission, thereby maximizing
+ alleviation of transmission bias.  If two different satellites
+ to transmit personalized models from the same device
+closeuploadtimestothesamerecipient,thesecondmodel,
+having a minimal difference in freshness, is placed at
+the end of
+the transmission queue once the rst model is received. The sec-
+ond model is transmitted only if the bandwidth is signicantly idle,
+thus avoiding redundancy.
+Heterogeneousmultigraph
+addressthemultifacetedheterogeneity issues highlighted in
+2
+SatFedconstructsaglobalmultigraph,aimingtolever-
+ model exchanges across satellite networks to capture the
+ relationships between devices and ultimately guide local
+updates. We document three types of heterogeneous relationships
+to construct the multigraph
+simi-
+larity edges
+connection edges
+computation
+detailsareas follows.
+Similarityedges
+describedin
+2.2
+diversedevicesexhibituniquelocal
+ risks attributed to differences in training data
+distribution. Similarity edges
+toaiddevicesindiscerning
+peermodelsobtainedfromthesatellitenetworkbetter align
+with their optimization goals. Borrowing from state-of-the-art
+methods [
+we measure the similarity of local optimization
+bycalculatingthecosine
+ofmodelparameters
+training.However,
+satellitenetworkswheremodel fresh-
+ness varies, simple cosine similarity may lead to inaccurate mea-
+surements, necessitating freshness calibration. Therefore, we
+compute the similarity edge
+devices
+con-
+follows:
+j 1
+short,whentwomodels have similar freshness
+the
+ similarity accurately reects the similarity of their local
+optimization objectives. Conversely, when their freshness differs
+signicantly
+thecosinesimilarityfailstoreecttheirdata
+distribution accurately. The condence
+the similarity
+updates, as detailed in
+3.3.4
+Connectionedges
+discussed in
+2.3
+terrestrial bandwidth stragglers
+inrelativelyoutdatedmodels.Connectionedgeshelpstrag-
+glers identify potential helpers. We monitor the communication
+frequency
+eachedge device
+thePSoveraspeci-
+ed time window
+werecord the frequency
+suc-
+transmissionsofpersonalized models from devices
+satellite networks. Subsequently, the connection edge is
+denoted as follows:
+j
+
+
+
+ C
+j
+theweightbalancingthe two indicators.
+if device
+signicantly more exchanges with the server
+than device
+ashortperiod of time
+Thissuggeststhat
+relymoreon peer model
+keepupwithglobaltrain-
+ing pace. Moreover,
+encourages
+learn from more familiar
+ easily accessible peer models, thereby reducing uctuations
+in the convergence of the entire system.
+Computationedges
+mitigatetheglobalmodeldegradationcausedby the uneven
+training mentioned in
+2.4
+we devise the computation
+track the differences in update speeds across
+therebyassistingin
+compensating for undertrained ones.
+We dene
+theupdate speed of
+theEuclideandistance
+ parameters before and after the update, divided by the
+time interval
+thetime when
+lastupdated):
+t t
+computed as the ratio of model update
+speeds between different devices:
+j
+theupdate speed of
+on
+evaluates and compares the model
+speedsofalledgedevicesandcanadjustthelocal learning
+rate of undertrained models to prevent detrimental impacts on
+global model aggregation.
+Multigraphupdate
+updatesof the multigraph
+handledby
+theser-
+ and the devices
+ are synchronized at the server side. At
+occur
+at time
+any peer
+the satellite network, replacing the locally cached
+)
+k
+.
+R
+
+
+
+
+ .
+A
+i m
+j
+j
+C
+j
+model
+usingweightsbasedonthecondence
+mentioned earlier:
+Y. Zhang, Z. Lin, Z. Chen et al.
+Engineering 54 (2025) 115?126
+j
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i j
+condence
+Additionally,device
+recalculatesthe
+oftimes it received
+thetime window
+update
+subsequently adjusts
+Eq.
+Finally, we
+compute and similarly calculate
+updating
+Eq.
+Modeltraining
+sectionelucidateshowSatFed leverages the multigraph
+guidedevicesinextractingbenecialknowledgefromtransmit-
+modelsinsatellitenetworks, thereby enhancing local updates
+and improving training performance.
+Peer-guidedmodel
+SatFed, devices cache many peer models from the satellite
+ but these models differ greatly in their usefulness for
+local updates. Thus, using
+calculate the weight
+represents device
+dependencyon peer model
+local
+Thisdependencyconformstotwoprinciples,in line with
+the design goals of
+Themoresimilartheirlocal
+objectives,thestrongerthemutualdependency;and
+ the more frequent the recent communication between device
+theserver,andthe more often device
+modelissentto device
+stronger
+dependency on
+denedas
+i j A
+
+ j
+
+
+
+i j
+abalancing factor.
+allpeer model
+cache
+therespec-
+tive dependency
+generate a peer-guided model
+t
+ i j
+where is the cache size, and the exponential term diminishes
+impact of outdated models in the cache.
+short
+asynthesisofpeermodelsthatareahead
+globalupdateprogress and closely aligned with the optimization
+goals of
+Globalmodelupdate
+SatFed,the global model
+locallytrainedbydevices,with
+parametersbeingtransmittedviatheterrestrialnetworkto
+PSfor asynchronous updates. However, naive local updates result
+in the uneven training mentioned in
+2.4
+signicantly
+ model performance. We address this issue by using
+dynamically adjust the local learning rate based on the
+real-time peer model-update speeds. More specically, we use
+denotetheaverageupdatescaleof peers
+for each device
+I
+indicatesthat device
+globallylag-
+behind,anditslearningrateneedstobeincreased appropri-
+ately for better global model aggregation.
+SatFed establishes a dynamic adaptive learning rate
+device
+ln max 1 U
+representsthegaincoefcient.Ifthe updating speed of
+the global
+device
+learning rate
+preset hyperparameter
+otherwise,
+logarithmically
+with
+eachroundoflocalupdates begins, device
+thelatest global model
+theserver.Itusesa learn-
+ing rate
+trainfor
+ofgradientdescent on its dataset
+obtainingthe updated
+updatedmodelisthensentbackto
+server for asynchronous aggregation with a xed weight
+Personalizedmodelupdates
+training of the personalized device model
+guided by
+both the global model
+thepeer-guided model
+should
+ noted that, due to satellite assistance, local updates of
+needto wait for
+andcanproceedcontinu-
+ously. The local objective for
+asfollows:
+1
+the optimization objective consists of three components?
+ supervised learning (L
+
+ global model guidance from the
+terrestrial network (L
+
+), and peer model guidance from the
+satellite network (L
+ahyperparameter.
+pseudocodedetailsofSatFed are provided in
+1
+Obviously, satellite transmission allows devices to promptly
+ and evaluate model updates from peers, facilitating local
+ and effectively mitigating the negative impact of system
+heterogeneity on FL training. Without satellite communication,
+devices with limited terrestrial bandwidth or computational power
+severely degrade FL performance, as discussed in detail in
+4.3
+Notably,whileSatFedistailoredforterrestrialandsatel-
+ networks, it offers insights into hybrid centralized/
+decentralized FL frameworks in general.
+1. SatFed.
+Initialization:
+executes:
+foreach device
+asynchronouslydo
+2. Serversends
+device
+3. Device
+5. Device
+back {terrestrial}
+7. Serverupdates
+on
+3.3.4
+endfor
+Build
+on
+3.4.1
+Compute
+on
+3.4.1
+foreach local epoch
+1,2,..
+5. Randomlyselectsa batch
+endfor
+return
+Performanceevaluation
+presentsnumericalresultstoevaluatethetraining
+performanceoftheproposed SatFed framework and the effective-
+ness of each individual component.
+t
+j
+i j
+t t
+j
+j ,
+j ,
+m
+
+
+i j m
+U
+1 )
+m
+m
+b
+R
+i i i
+g
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+Experimentalsetup
+implemented SatFed using Python 3.7 and PyTorch 1.12.1
+traineditwithNVIDIAGeForce RTX 3090 graphics processing
+units (GPUs). In the experiments,
+devices were
+deployed, along with
+orbiting the Earth, dis-
+tributed across
+orbits.Weusedtwowidelyacclaimed
+image datasets, Fashion-MNIST [
+andCIFAR-100[
+utilizing
+Dirichletdistributiontogeneratenon-IIDlabel distributions for
+the devices
+andset the
+to
+stronglynon-
+settings and to
+independentidenticallydistri-
+(IID)settings.Thedataquantities per device were randomly
+assigned, ranging from
+employed a ResNet-50
+model with a size of
+for CIFAR-100 (ResNet-18 for
+Fashion-MNIST). An Adam optimizer [
+was used, with the
+learning rate
+to
+thebatchsize set to
+loss
+thecross-entropyloss.
+torealLEO satellite networks [
+eachsatelliteorbit
+had an
+operational cycle of
+and covered approximately
+edgedevices, with a contact time of about
+perdevice.
+bandwidthofthe satellite network was set to
+forthe
+ and 10 Mbps for the uplink as measured.
+The local
+update period was set to
+Halfthedeviceshada compute
+power of
+(equivalenttoaRaspberryPi4Model
+B), while
+the others had only
+that.Halfthedevicestypicallyoperated
+under an
+terrestrialnetworkbandwidth,while
+
+hada90%chanceofcommunication blockage or discon-
+necting from the server, retrying every
+Overallperformance
+this section, we
+ the overall performance of the
+ framework in terms of test accuracy and convergence
+Inaddition,
+assesstheimpact of satellite network trans-
+mission on SatFed?s training. To investigate the advantages of
+SatFed, we compare it with ve other benchmarks:
+Theserver waits for all devices toreturn their model aggregates them into a new global model, and sends
+it to devices to start the next round [
+Theupdatedmodelsfromalldevicesareaggregated
+into the latest global model in an asynchronous manner [
+Eachdevicemaintainsapersonalizedmodel,trainsaglo-
+usingFedAvg,andincorporates it to aid personalized
+model updates with L2 regularization [
+Ditto-Async: This asynchronous
+ of Ditto
+ the
+global model following FedAsync.
+): SatFed?s continuous local update method is without incorporating a peer guide model during
+Theoverallperformanceof SatFed
+8
+testofSatFedcomparedwithother
+ on the Fashion-MNIST
+ CIFAR-10
+ datasets.
+and Dittoexhibitsignican
+ slowerconvergence
+ to
+forbandwidth-stragglingdevicesduringeachglobalmodel
+aggregation.Incontrast,FedAsyncandDitto-Asyncacceleratecon-
+atthecostoftraininginstability,whichcanbeattributedthedegradationcausedbyoutdatedmodelsfromasynchronous
+Itisevidentthat SatFed achieves the fastest convergence
+among all benchmarks, facilitated by its connection edges, which
+enable stragglers to learn from high-bandwidth peers via satellite
+networks and thereby alleviate local model drag on the system
+convergence progress. Moreover, SatFed achieves signicantly
+higher test accuracy than the other benchmarks, thanks to its sim-
+ilarity edges, which enable devices to selectively collaborate with
+thathavesimilardatadistributions.Furthermore,thecom-
+edgesadapttodifferencesinmodelupdatespeeds,guid-
+theadjustmentoflocallearningratestomitigatethenegativeofuneven training on the global model. Notably, SatFed()
+does not achieve the same performance as SatFed, suggesting that
+peer guidance is the key to SatFed?s superior performance.
+1
+the converged accuracies and speeds for the
+ and CIFAR-100 datasets. It is evident that SatFed
+ higher test accuracies of 2.35% and 2.26% (1.07% and
+1.01%) in the IID and non-IID settings on CIFAR-100 (Fashion-
+MNIST) compared
+with the other methods, with convergence
+speeds up to
+thanthoseofFedAvg.
+fastcon-
+ is mainly due to its satellite-assisted guidance from
+high-bandwidth devices, which prevents personalized models
+becomingoutdated.ComparedwithFedAvg(FedAsync),Ditto
+(Ditto-Async) achieves better test accuracy in non-IID environ-
+ with an average
+improvement of 8.12% due to the use of
+personalized models. Compared with Ditto-Async, SatFed effec-
+tively enhances collaboration among similar peers, while also sens-
+ing and compensating for uneven training, further improving
+performance.
+Theimpactofsatellite network transmission
+9
+theimpactofdifferentsatellitenetworktransmis-
+modes on SatFed?s training performance. As described in
+3.2.1
+ifdevicesuploadonlytheirownmodels,theycanonly
+ models from their satellite-network direct peers, leading
+biasesthatunderminetheeffectivenessofpeer-guidedmodels. contrast, the redundant transmission mode involves devices
+ all cached models to satellites, thereby mitigating bias peer-guided model knowledge sources. However, this results
+ a surge in transmission loads, overwhelming the highly con-
+ uplink links and causing massive model-upload failures.
+It is evident that SatFed?s use of a freshness-priority model queue
+leads to the best performance. This is because the queue prioritizes
+the transmission of more critical models based on freshness in con-
+strained satellite networks, ensuring overall model currency across
+the satellite networks. Consequently, peer-guidance knowledge
+remains up to date, resulting in training-performance
+improvements.
+Micro-benchmark
+Similarityedges
+10
+illustratestheeffectofsimilarityedgesonthetrainingof
+the CIFAR-100 dataset. Clearly, SatFed with
+optimal
+performancein
+IID
+non-IIDsettings.Remarkably,SatFed
+demonstratesperformanceimprovementsoverDittoevenwithout
+ edges. This result suggests that using the simply aver-
+aged peer models from satellite networks as the peer-guided
+stillbenecial,
+toamodestextent.Thisimprove-
+ is more signican
+ in the non-IID scenario, reaching 1.17%,
+ it is negligible in the IID scenario. This result is likely
+ in the IID setting, the global model excels in knowledge
+extraction, whereas its efcacy diminishes in the non-IID scenario,
+necessitating supplementary knowledge from peers. A comparison
+of SatFed?s accuracy with and without
+that
+similar-
+ capture in
+ transmissions within satellite networks
+performanceby2.34%inIIDand1.92% in non-IID scenarios.
+By mitigating the impact of outdated models on similarity updates
+and effectively guiding
+improvesthe perfor-
+mance of local updates.
+Connectionedges
+11
+the impact of connection edges on CIFAR-100
+ training performance. A comparison of the training
+performancewithand without
+thattheedgeconnec-
+impactismostsignicantintheearlystagesoftraining.At
+point,alldevices?modelupdates are relatively similar. Models
+with poor terrestrial bandwidth can learn directly from the faster-
+progressing models through
+accelerating
+
+ However,
+ the later stages, due to the impact of
+ heterogeneity, the update directions of different devices
+diverge signicantly, reducing the effectiveness of
+Y. Zhang, Z. Lin, Z. Chen et al.
+Engineering 54 (2025) 115?126
+8. TestaccuracyfortheFashion-MNISTandCIFAR-100datasets underIIDandnon-IIDsettings. (a) Fashion-MNIST (IID); (b) Fashion-MNIST (non-IID); (c) CIFAR-100
+(IID); (d) CIFAR-100 (non-IID).
+1
+testaccuracy(withdevicestandarddeviation)and speed of SatFed and other benchmarks.
+accuracy(%)andspeed on the Fashion-MNIST
+accuracy(%)andspeedon the CIFAR-100 dataset
+? 5.07
+? 4.65
+? 4.39
+?2.91
+?4.67(5.66)
+?3.40(3.39)
+?5.91(12.89?)
+?3.27(12.18?)
+?4.50(1.08?)
+?3.87(0.89?)
+?5.16(3.39)
+?3.17(1.31?)
+?4.94(3.72)
+?3.47(2.36)
+?7.09(22.22?)
+?4.32(10.91?)
+)
+?7.08(3.34)
+?3.77(3.70?)
+?8.14(25.72?)
+?3.92(11.84?)
+?3.02(13.82?)
+?2.23(12.16?)
+?5.23(100.60?)
+?2.97(19.19?)
+optimalvaluesareinbold.Speedisthereciprocaloftheratiobetweentheepochs needed to reach FedAvg?s converged accuracy and the epochs required by FedAvg itself.
+9. Theimpactofsatellitenetworktransmissionmethodsontrainingperformance.(a)CIFAR-100(IID); (b) CIFAR-100 (non-IID). Bias and redundant transmissions are
+detailed in
+3.2.1
+SatFedemploysthe freshness-priority queue scheme.
+Connectionedges
+12
+the effect of computation edges on SatFed
+training. Clearly, the assistance of
+increasingthelearning
+
+ undertrained models signicantly improves the perfor-
+oftheaggregatedglobalmodelsinIIDscenarios.Although
+ improvement in non-IID scenarios is less pronounced, it still
+effectively increases the injection of global knowledge into person-
+alized models. In summary, computation edges effectively improve
+2
+2
+5
+5
+performance across both IID and non-IID settings. This
+underscorestheabilitycomputationedgestocapture
+ferences in local training progress and effectively address these dif-
+ferences through learning rate adjustments.
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+10. Ablationexperimentsforsimilarityedges.(a)CIFAR-100(IID);(b)CIFAR-100(non-IID).Toemphasizetheimpact of data heterogeneity, all edge devices are under
+ideal bandwidth and computational conditions. w/o: without.
+Ablationforconnectionedges.(a)CIFAR-100(IID);(b)CIFAR-100(non-IID).To highlight the terrestrial bandwidth heterogeneity, all devices train with
+ideal computing power.
+12. Ablation experiments for computation edges. (a) CIFAR-100 (IID); (b) CIFAR-100 (non-IID). To emphasize the impact of computation heterogeneity, all devices
+operate within ideal terrestrial bandwidth.
+Relatedwork
+systemheterogeneityinFL,whichencompassesdata,band-
+ and computation
+ is a well-established eld
+with various approaches. To address data heterogeneity chal-
+lenges, Li et al. [
+introduced personalized device models,
+thefairness androbustness of the system. Smith et al.
+adaptedmultitasklearningforpersonalizationbytreatingdif-
+devices as distinct learning tasks. Ye et al. [
+customized
+aggregationweightsforeachdevicebymeasuringthesimilar-
+betweenpersonalizedmodels.To tackle the issue of bandwidth
+heterogeneity, Nguyen et al. [
+maintainedabufferfortheaggre-
+ of device updates, reducing the performance degradation
+caused by outdated models. Wang et al. [
+designed a cluster-
+FL mechanism with hierarchical aggregation, balancing
+communication resources by combining synchronous and asyn-
+ aggregations. As for the uneven training issues caused
+by computational heterogeneity, Diao et al. [
+deployeddevice-
+ local models adapted to match local computational
+resources and designed their aggregation method accordingly.
+existing methods t
+ address FL system hetero-
+ mainly focus on terrestrial PS communication architec-
+ overlooking the potential offered by emerging hybrid
+communicationpathwayssuchassatellite-assistedterrestrialnet-
+works. This paper proposes novel solutions utilizing LEO-satellite-
+assisted communication to tackle heterogeneity challenges, pre-
+senting an orthogonal approach compared with the aforemen-
+tioned methods.
+Satellite?terrestrial
+ are an emerging and promising
+ architecture with signicant potential to alleviate terres-
+trial network transmission bottlenecks and improve overall
+transmission service quality [
+Cui et al. [
+utilized satellite
+ to assist terrestrial IoT networks in reducing
+latency.Dinget al. [
+designeddynamictransmis-
+ and computational resource optimization for dense LEO-
+satellite-assisted mobile-edge computing. AlthoughLEO satellites
+potentialtoassistinterrestrialcommunications,theexplo-
+ of FL in satellite?terrestrial hybrid network architectures
+ largely uncharted. This problem is non-trivial, requiring
+the systematic design of model training, aggregation, and
+transmission for hybrid network architectu
+res, while addressing
+satellite network topology, bandwidth issues, and various
+heterogeneity challenges in FL training.
+Y. Zhang, Z. Lin, Z. Chen et al.
+Engineering 54 (2025) 115?126
+Conclusions
+thispaper,weproposedSatFed,aresource-efcientsatellite-
+ FL frameworkdesigned toenhance trainingperformance convergence speed in complex heterogeneous environments.
+SatFeddesignsaprioritytransmissionqueuebasedonmodel
+ differences, enabling devices in satellite networks with
+ constrained transmission rates and complex topologies to
+ near-real-time peer models. Furthermore, SatFed utilizes
+ multigraph to perceive the heterogeneous relationships among
+devices in real time, as indicated
+by the models transmitted in
+satellite networks. Finally, SatFed utilizes perceived heterogeneity
+relationships by constructing peer guide models from satellite
+transmission, thus directing local updates. Extensive experiments
+showed that the SatFed framework outperforms state-of-the-art
+benchmarks. This work underscores the potential of deploying
+SatFed across real LEO-satellite-assisted terrestrial networks.
+authorshipcontributionstatement
+Zhang:Writing?originaldraft,Software,Methodology,
+Conceptualization.ZhengLin:Writing?review&editing,Method-ZheWriting?reviewediting,Supervision,
+ Zihan Fang: Investigation, Data curation. Xianhao Supervision. Wenjun Zhu: Resources, Data curation. Jin
+ Project administration, Investigation. Yue Gao: Supervision,
+Project administration.
+ofcompetinginterest
+authorsdeclarethattheyhavenoknowncompetingnan-
+ interests or personal relationships that could have appeared
+to inuence the work reported in this paper.
+Acknowledgment
+workwassupportedbytheNationalNaturalScience Foun-
+dation of China (62341105).
+J,RenJ,ZhangY,YueS,ZhangY. SESAME: a resource expansion and sharing
+for multiple edge services providers. IEEE/ACM Trans Netw 2024;32
+X,XuH,ZouL,DuanJ,WuC,XueY,etal.Rosevin:employingresource-
+rate-adaptiveedgesuper-resolutionforvideostreaming.In:Proceedings
+ the IEEE Annual Joint Conference: INFOCOM, IEEE Computer and
+Communications Societies; 2024 May 20?23; New York City, NY, USA. New
+York City: IEEE; 2024. p. 1?10.
+J, Liu J, Zhang Y, Li Z, Lyu F, Wang Z, et al. An efcient two-layer task
+ scheme for MEC system with multiple
+services providers. In:
+Proceedings of IEEE Conference on Computer Communications; 2022 May 2?5;
+online. New York City: IEEE; 2022. p. 1519?28.
+T,LiA,ChenZ,WangH,LuoJ.AutoFed:heterogeneity-awarefederated
+ learning for robust autonomous driving. In: Proceedings of the
+AnnualInternational Conference on Mobile Computing and Networking;
+2023 Oct 2?6; Madrid, Spain. New York City: Association for Computing
+Machinery (ACM); 2023. p. 1?15.
+L, Testa G. Scrutinizing the EU general data protection regulation.
+A,FaticantiF,MarfoqO,NegliaG, Leonardi E. Federated learning under
+and correlated client availability. IEEE/ACM Trans Netw
+B, Moore E, Ramage D, Hampson S, Arcas BA. Communication-
+learningofdeepnetworksfromdecentralizeddata.In:Proceedingsof
+20th International
+Conference on
+Articial Intelligence and Statistics; 2017
+Apr 20?22; Ft. Lauderdale, FL, USA. New York City: MLResearchPress; 2017.
+A, Flocco M, Esposito F, Marchetto G. Owl:
+ control with
+
+networksviareinforcementlearning.In:Proceedings of IEEE
+Conference on Computer Communications; 2021 May
+10?13; online. New
+York City: IEEE; 2021. p.
+P,SkubicB,RostamiA,FioraniM,Monti P, Ghebreten-sa? Z, et al. Data
+control architectures for 5G transport networks. J Lit Technol
+D, Zhang W, Ye Q, Zhang C, Zhang N, Huang C, et al. DetFed: dynamic
+for deterministic federated learning over time-sensitive
+IEEETransMobile Comput 2024;23(5):5162?78
+J, Kishk MA, Alouini MS. Space?air?ground?sea integrated networks:
+coverage analysis. IEEE Trans Wirel Commun 2023;22
+Z, Wu Q, Yu S, Li R, Zhang F, Chen X. FedLEO: an ofoading-assisted
+learning framework for low Earth orbit
+IEEETransMobile Comput 2024;23(5):5260?79
+Y, Wu Q, Lai Z, Li H. Enabling low-latency-capable satellite?ground for emerging LEO satellite networks. In: Proceedings of IEEE
+
+on Computer Communications; 2022 May 2?5; New York City,
+NY, USA. New York City: IEEE; 2022. p. 1329?38.
+T,
+ A, Zhang Z, Chaudhry AU, Yanikomeroglu H. The digital
+Canada and the role of LEO satellites in bridging the gap.
+Mag 2022;60(6):24?30
+Z, Li H, Wang Y, Wu Q, Deng
+ Liu
+ et al. Achieving resilient and
+routinginspace?terrestrialintegratednetworks.In:
+Proceedings of IEEE Conference on Computer Communications; 2023 May 17?
+20; New York City, NY, USA. New York City: IEEE; 2023. p. 1?10.
+P, Caini C, L?lf M. DTN LEO satellite communications
+stations and GEO relays.
+ Dhaou R, Beylot AL, Montpetit
+Lucani D, Mucchi L, editors. Personal satellite services. Cham: Springer;
+p. 1?12
+speed test tool for TCP, UDP and SCTP [Internet]. Reims:
+iKoula; [cited 2025 Jun 18]. Available from:
+K,ZhangX,RenS,SunJ.Deepresiduallearning
+image
+In:
+ of the 2016 IEEE Conference on Computer Vision and Pattern
+Recognition; 2016 Jun 27?30; Las Vegas, NV, USA.
+New York City: IEEE; 2016.
+p. 70?8.
+T, Sahu AK, Zaheer M, Sanjabi M, Talwalkar A, Smith V. Federated
+ in heterogeneous networks. In:
+ of Machine
+Learning and Systems 2; 2020 Mar 2?4; Austin, TX, USA. Indio: MLSys
+Proceedings; 2020. p. 429?50.
+S,LiB.Towardsoptimalmulti-modalfederatedonnon-IIDdata
+ hierarchical gradient blending. In: Proceedings of IEEE Conference on
+Computer Communications; 2022 May 2?5; London, UK. New York City: IEEE;
+2022. p. 1469?78.
+AZ, Yu H, Cui L, Yang Q. Towards personalized federated learning. IEEE
+NetwLearn Syst 2022;34(12):9587?603
+A, Hinton G. Learning multiple layers of features from tiny
+Toronto:Universityof Toronto; 2009
+Y,Xu
+Xu
+WangL,QianC.Adaptivecongurationforheterogeneous
+ in decentralized federated learning. In: Proceedings of IEEE
+Conference on Computer Communications; 2023 May 17?20; Hoboken, NJ,
+USA. New York City: IEEE; 2023. p. 1?10.
+E,DingJ,TarokhV.HeteroFL:computationandcommunicationefcient
+federated learning for heterogeneous clients.
+2020. arXiv:2010.01264.
+PJ, Johnston SJ, Perkins CS, Garnock-Jones T, Tso FP, Pezaros D, et al.
+singleboardcomputerclusters.
+Future Gener Comput
+2020;102:278?91
+T,HuS,BeiramiA,SmithV.Ditto:fairandrobustfederatedlearningthrough
+ In: Proceedings of the 38th International Conference on
+Machine Learning; 2021 Jul 18?24; online. New York City: MLResearchPress;
+2017. p.6357?68.
+TC, Tran NH, Nguyen TD. Personalized federated learning with moreau In: Proceedings of the 34th International Conference on Neural
+Information Processing Systems; 2020 Dec 6?12; Vancouver, BC, Canada. Red
+Curran Associates Inc.; 2020. p. 21394?405.
+R,NiZ,Wu
+ChenS,WangY.Personalizedfederatedlearningwithinferred
+ graphs. In: Proceedings of 40th International Conference on
+Machine Learning; 2023 Jul 23?29; Honolulu, HI, USA. New York City:
+MLResearchPress; 2023. p. 39801?17.
+H, Rasul K, Vollgraf R. Fashion-MNIST: a novel image dataset for
+benchmarking machine learning algorithms. 2017. arXiv:1708.07747.
+DP,
+
+ Adam: a method for stochastic optimization. 2014.
+C,
+ S, Gupta I. Asynchronous federated optimization. 2019.
+Y. Zhang, Z. Lin, Z. Chen et al. Engineering 54 (2025) 115?126
+V,ChiangCK,Sanjabi
+TalwalkarAS.Federatedmulti-tasklearning.In:
+ of the 31st International Conference on Neural Information
+Processing Systems; 2014 Dec
+4?9; Long Beach, CA, USA. Red Hook: Curran
+Associates Inc.; 2014. p. 4427?37.
+J,MalikK,ZhanH,YousefpourA,RabbatM,MalekM,etal.Federated
+withbufferedasynchronousaggregation.In:Proceedingsof The 25th
+International Conference on Articial Intelligence and Statistics; 2022 Mar 28?
+30; online. New York City: MLResearchPress; 2022. p.3581?607.
+Z, Xu H, Liu J, Huang H, Qiao C, Zhao Y. Resource-efcient federated
+withhierarchicalaggregation in edge computing. In: Proceedings of
+the IEEE Annual Joint Conference: INFOCOM, IEEE Computer and
+Societies; 2021 May 10?13; online. New York City: IEEE;
+2021. p. 1?10.
+Peng M,
+ S, Lin G, Zhang
+P. Integrated satellite?terrestrial
+architectures, key techniques,
+ experimental progress. IEEE
+2022;36(6):191?8
+G, Duan P, Xu L, Wang W. Latency optimization for hybrid GEO?LEO
+networks. IEEE Internet Things J 2023;10(7):
+C, Wang JB, Cheng M, Lin M, Cheng
+J. Dynamic transmission and
+optimization for dense LEO satellite assisted mobile-
+computing.IEEETrans Commun 2023;71(5):3087?102
